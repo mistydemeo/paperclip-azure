@@ -1,5 +1,9 @@
 require 'paperclip/storage/azure/environment'
 
+require 'azure/core'
+require 'azure/storage/blob'
+require 'azure/storage/common'
+
 module Paperclip
   module Storage
     # Azure's container file hosting service is a scalable, easy place to store files for

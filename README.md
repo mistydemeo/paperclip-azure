@@ -1,13 +1,12 @@
 = paperclip-azure
 
-home  :: https://github.com/supportify/paperclip-azure
-code  :: https://github.com/supportify/paperclip-azure
-rdoc  :: https://www.rubydoc.info/docs/paperclip-azure
-bugs  :: https://github.com/supportify/paperclip-azure/issues
+home  :: https://github.com/mistydemeo/paperclip-azure
+code  :: https://github.com/mistydemeo/paperclip-azure
+bugs  :: https://github.com/mistydemeo/paperclip-azure/issues
 
 == DESCRIPTION:
 
-Paperclip-Azure is a [Paperclip](https://github.com/thoughtbot/paperclip) storage driver for storing files in a Microsoft Azure Blob.
+Paperclip-Azure is a [Paperclip](https://github.com/thoughtbot/paperclip) storage driver for storing files in a Microsoft Azure Blob. This is a friendly fork of the [original gem](https://github.com/supportify/paperclip-azure); it incorporates bugfixes that haven't yet been incldued in point releases of the upstream gem and some new features.
 
 == FEATURES/PROBLEMS:
 
@@ -92,7 +91,7 @@ Or, in the instance where the credentials are specified at the model level:
 
 Add this line to your application's Gemfile after the Paperclip gem:
 
-    gem 'paperclip-azure', '~> 1.0'
+    gem 'md-paperclip-azure', '~> 2.0'
 
 And then execute:
 
@@ -119,6 +118,7 @@ And then execute:
 (The MIT License)
 
 Copyright (c) 2017 Supportify, Inc.
+Copyright (c) 2023 Misty De Méo
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the 'Software'), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 

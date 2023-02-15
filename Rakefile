@@ -9,8 +9,8 @@ Hoe.plugin :git
 Hoe.plugin :gemspec
 Hoe.plugin :rubygems
 
-Hoe.spec "paperclip-azure" do
-  developer("hireross.com", "help@hireross.com")
+Hoe.spec "md-paperclip-azure" do
+  developer("Misty De Méo", "mistydemeo@gmail.com")
   license "MIT" # this should match the license in the README
 
   extra_deps << ['azure-storage-blob', '~> 2.0.1']

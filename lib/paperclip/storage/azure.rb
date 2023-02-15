@@ -78,6 +78,17 @@ module Paperclip
           @http_proxy = @options[:http_proxy] || nil
         end
 
+        unless Paperclip::Interpolations.respond_to? :azure_alias_url
+          Paperclip.interpolates(:azure_alias_url) do |attachment, style|
+            protocol = attachment.azure_protocol(style, true)
+            host = attachment.azure_host_alias
+            path = attachment.path(style).
+                   split("/")[attachment.azure_prefixes_in_alias..-1].
+                   join("/").
+                   sub(%r{\A/}, "")
+            "#{protocol}//#{host}/#{path}"
+          end
+        end
         Paperclip.interpolates(:azure_path_url) do |attachment, style|
           attachment.azure_uri(style)
         end unless Paperclip::Interpolations.respond_to? :azure_path_url
@@ -96,6 +107,27 @@ module Paperclip
           "#{azure_uri}?#{signer.generate_token(container_name, obj_path, 'r', time)}"
         else
           url(style_name)
+        end
+      end
+
+      def azure_host_alias
+        @azure_host_alias = @options[:azure_host_alias]
+        @azure_host_alias = @azure_host_alias.call(self) if @azure_host_alias.respond_to?(:call)
+        @azure_host_alias
+      end
+
+      def azure_prefixes_in_alias
+        @azure_prefixes_in_alias ||= @options[:azure_prefixes_in_alias].to_i
+      end
+
+      def azure_protocol(style = default_style, with_colon = false)
+        protocol = @azure_options[:protocol]
+        protocol = protocol.call(style, self) if protocol.respond_to?(:call)
+
+        if with_colon && !protocol.empty?
+          "#{protocol}:"
+        else
+          protocol.to_s
         end
       end
 

@@ -4,12 +4,12 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'paperclip/azure.rb'
 
 Gem::Specification.new do |gem|
-  gem.name          = "paperclip-azure"
+  gem.name          = "md-paperclip-azure"
   gem.version       = Paperclip::Azure::VERSION
-  gem.authors       = ["hireross.com"]
-  gem.email         = ["help@hireross.com"]
+  gem.authors       = ["Misty De Méo"]
+  gem.email         = ["mistydemeo@gmail.com"]
   gem.summary       = %q{Paperclip-Azure is a Paperclip storage driver for storing files in a Microsoft Azure Blob}
-  gem.homepage      = "https://github.com/supportify/paperclip-azure"
+  gem.homepage      = "https://github.com/mistydemeo/paperclip-azure"
 
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }

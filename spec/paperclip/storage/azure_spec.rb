@@ -245,8 +245,8 @@ describe Paperclip::Storage::Azure do
         @dummy.avatar = stringy_file
       end
 
-      allow(::Azure::Storage::Core::Auth::SharedAccessSignature).to receive(:new).and_call_original
-      allow(::Azure::Storage::Core::Auth::SharedAccessSignatureSigner).to receive(:new).and_call_original
+      allow(::Azure::Storage::Common::Core::Auth::SharedAccessSignature).to receive(:new).and_call_original
+      allow(::Azure::Storage::Common::Core::Auth::SharedAccessSignatureSigner).to receive(:new).and_call_original
     end
 
     it "generates a url for the thumb" do
@@ -254,7 +254,7 @@ describe Paperclip::Storage::Azure do
         expect { @dummy.avatar.expiring_url(1800, :thumb) }.not_to raise_error
       end
 
-      expect(::Azure::Storage::Core::Auth::SharedAccessSignature).to have_received(:new)
+      expect(::Azure::Storage::Common::Core::Auth::SharedAccessSignature).to have_received(:new)
         .with('prod_storage', anything)
     end
 
@@ -263,7 +263,7 @@ describe Paperclip::Storage::Azure do
         expect { @dummy.avatar.expiring_url(1800) }.not_to raise_error
       end
 
-      expect(::Azure::Storage::Core::Auth::SharedAccessSignature).to have_received(:new)
+      expect(::Azure::Storage::Common::Core::Auth::SharedAccessSignature).to have_received(:new)
         .with('prod_storage', anything)
     end
   end

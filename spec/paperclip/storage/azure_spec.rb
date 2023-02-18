@@ -172,7 +172,7 @@ describe Paperclip::Storage::Azure do
         end
       end
 
-      file = Paperclip.io_adapters.for(stringio)
+      file = Paperclip.io_adapters.for(stringio, Paperclip::Attachment.default_options[:adapter_options])
 
       @dummy = Dummy.new
       @dummy.avatar = file

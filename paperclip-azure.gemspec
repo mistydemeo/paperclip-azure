@@ -25,7 +25,6 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency "kt-paperclip", "~> 7.1"
   gem.add_development_dependency "sqlite3", "~> 1.3"
   gem.add_development_dependency "rspec", "~> 3.0"
-  gem.add_development_dependency "simplecov", "~> 0.14"
   gem.add_development_dependency "activerecord", "~> 6.1"
   gem.add_development_dependency "activerecord-import", "~> 1.4"
   gem.add_development_dependency "activemodel", "~> 6.1"

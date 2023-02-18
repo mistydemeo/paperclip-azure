@@ -8,26 +8,10 @@ require 'active_support/core_ext'
 require 'ostruct'
 require 'pathname'
 require 'activerecord-import'
-require 'simplecov'
 require 'yaml'
 require 'paperclip'
 
 ROOT = Pathname(File.expand_path(File.join(File.dirname(__FILE__), '..')))
-
-module SimpleCov::Configuration
-  def clean_filters
-    @filters = []
-  end
-end
-
-SimpleCov.configure do
-  clean_filters
-  load_adapter 'test_frameworks'
-end
-
-ENV["COVERAGE"] && SimpleCov.start do
-  add_filter "/.rvm/"
-end
 
 $LOAD_PATH << File.join(ROOT, 'lib')
 $LOAD_PATH << File.join(ROOT, 'lib', 'paperclip')

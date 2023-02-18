@@ -30,4 +30,5 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency "activerecord-import", "~> 1.4"
   gem.add_development_dependency "activemodel", "~> 6.1"
   gem.add_development_dependency "activesupport", "~> 6.1"
+  gem.add_development_dependency "rspec-files", "~> 1.1", ">= 1.1.3"
 end

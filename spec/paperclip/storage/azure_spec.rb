@@ -392,7 +392,7 @@ describe Paperclip::Storage::Azure do
 
       rails_env('test') do
         rebuild_model storage: :azure,
-          azure_credentials: File.new(fixture_file('azure.yml'))
+          azure_credentials: fixture_file('azure.yml')
 
         Dummy.delete_all
 

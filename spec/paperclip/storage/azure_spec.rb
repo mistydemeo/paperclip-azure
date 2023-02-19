@@ -74,6 +74,7 @@ describe Paperclip::Storage::Azure do
 
         @dummy = Dummy.new
         @dummy.avatar = stringy_file
+        stringy_file.close
       end
 
       it "raises an argument error" do
@@ -95,6 +96,7 @@ describe Paperclip::Storage::Azure do
 
       @dummy = Dummy.new
       @dummy.avatar = stringy_file
+      stringy_file.close
 
       allow(@dummy).to receive(:new_record?).and_return(false)
     end
@@ -178,6 +180,7 @@ describe Paperclip::Storage::Azure do
 
       @dummy = Dummy.new
       @dummy.avatar = file
+      file.close
       @dummy.save
 
       allow(@dummy).to receive(:new_record?).and_return(false)
@@ -201,6 +204,7 @@ describe Paperclip::Storage::Azure do
         url: ":asset_host"
       @dummy = Dummy.new
       @dummy.avatar = stringy_file
+      stringy_file.close
       allow(@dummy).to receive(:new_record?).and_return(false)
     end
 
@@ -245,6 +249,7 @@ describe Paperclip::Storage::Azure do
       rails_env("production") do
         @dummy = Dummy.new
         @dummy.avatar = stringy_file
+        stringy_file.close
       end
 
       allow(::Azure::Core::Auth::SharedAccessSignature).to receive(:new).and_call_original
@@ -417,6 +422,7 @@ describe Paperclip::Storage::Azure do
         end
       end
       @dummy.avatar = stringy_file
+      stringy_file.close
     end
 
     it "returns a correct path" do

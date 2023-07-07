@@ -166,16 +166,14 @@ module Paperclip
       end
 
       def obtain_azure_instance_for(options)
-        instances = (Thread.current[:paperclip_azure_instances] ||= {})
-        return instances[options] if instance[options]
-
         if options[:use_development_storage]
           service = ::Azure::Storage::Blob::BlobService.create(use_development_storage: true)
         else
           service = ::Azure::Storage::Blob::BlobService.create(storage_account_name: options[:storage_account_name],
                                                                storage_access_key: options[:storage_access_key])
         end
-        instances[options] = service
+        
+        service
       end
 
       def azure_uri(style_name = default_style)

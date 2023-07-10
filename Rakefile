@@ -24,7 +24,6 @@ Hoe.spec "md-paperclip-azure" do
   extra_dev_deps << ['activerecord-import', '~> 1.4']
   extra_dev_deps << ['activemodel', '~> 6.1']
   extra_dev_deps << ['activesupport', '~> 6.1']
-  extra_dev_deps << ['rspec-files', '~> 1.1']
 end
 
 # vim: syntax=ruby

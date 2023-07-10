@@ -1,6 +1,5 @@
 require 'rubygems'
 require 'rspec'
-require 'rspec/files'
 require 'active_record'
 require 'active_record/version'
 require 'active_support'

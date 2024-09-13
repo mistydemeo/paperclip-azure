@@ -110,7 +110,7 @@ describe Paperclip::Storage::Azure do
                     path: ":attachment/:basename:dotextension",
                     azure_credentials: {
                       'access_key_id' => "12345",
-                      'secret_access_key' => "54321"
+                      'storage_access_key' => "54321"
                     }
 
         File.open(fixture_file('5k.png'), 'rb') do |file|
@@ -244,27 +244,18 @@ describe Paperclip::Storage::Azure do
         @dummy = Dummy.new
         @dummy.avatar = stringy_file
       end
-
-      allow(::Azure::Core::Auth::SharedAccessSignature).to receive(:new).and_call_original
-      allow(::Azure::Storage::Common::Core::Auth::SharedAccessSignatureSigner).to receive(:new).and_call_original
     end
 
     it "generates a url for the thumb" do
       rails_env("production") do
-        expect { @dummy.avatar.expiring_url(1800, :thumb) }.not_to raise_error
+        expect(@dummy.avatar.expiring_url(1800, :thumb)).to include("https://prod_storage.blob.core.windows.net/prod_container/avatars/thumb/data")
       end
-
-      expect(::Azure::Core::Auth::SharedAccessSignature).to have_received(:new)
-        .with('prod_storage', anything)
     end
 
     it "generates a url for the default style" do
       rails_env("production") do
-        expect { @dummy.avatar.expiring_url(1800) }.not_to raise_error
+        expect(@dummy.avatar.expiring_url(1800)).to include("https://prod_storage.blob.core.windows.net/prod_container/avatars/original/data")
       end
-
-      expect(::Azure::Core::Auth::SharedAccessSignature).to have_received(:new)
-        .with('prod_storage', anything)
     end
   end
 

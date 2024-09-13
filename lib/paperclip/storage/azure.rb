@@ -1,8 +1,4 @@
-require 'paperclip/storage/azure/environment'
-
-require 'azure/core'
-require 'azure/storage/blob'
-require 'azure/storage/common'
+require "azure_blob"
 
 module Paperclip
   module Storage
@@ -59,13 +55,6 @@ module Paperclip
 
     module Azure
       def self.extended base
-        begin
-          require 'azure/storage/blob/blob_service'
-        rescue LoadError => e
-          e.message << " (You may need to install the azure-storage-blob gem)"
-          raise e
-        end unless defined?(::Azure::Core)
-
         base.instance_eval do
           @azure_options     = @options[:azure_options]     || {}
 
@@ -99,12 +88,9 @@ module Paperclip
 
       def expiring_url(time = 3600, style_name = default_style)
         if path(style_name)
-          signer = ::Azure::Core::Auth::SharedAccessSignature.new(
-            azure_account_name,
-            azure_credentials[:storage_access_key]
-          )
           obj_path = path(style_name).gsub(%r{\A/}, '')
-          "#{azure_uri}?#{signer.generate_token(container_name, obj_path, 'r', time)}"
+          expiry = Time.now.utc.advance(seconds: time).iso8601
+          azure_interface.signed_uri(obj_path, permissions: 'r', expiry:).to_s
         else
           url(style_name)
         end
@@ -157,7 +143,7 @@ module Paperclip
         @azure_interface ||= begin
           config = {}
 
-          [:storage_account_name, :storage_access_key, :container].each do |opt|
+          [:storage_account_name, :storage_access_key, :container, :principal_id, :use_managed_identities].each do |opt|
             config[opt] = azure_credentials[opt] if azure_credentials[opt]
           end
 
@@ -166,30 +152,26 @@ module Paperclip
       end
 
       def obtain_azure_instance_for(options)
-        if options[:use_development_storage]
-          service = ::Azure::Storage::Blob::BlobService.create(use_development_storage: true)
-        else
-          service = ::Azure::Storage::Blob::BlobService.create(storage_account_name: options[:storage_account_name],
-                                                               storage_access_key: options[:storage_access_key])
-        end
-        
-        service
+        AzureBlob::Client.new(
+          account_name: options[:storage_account_name],
+          access_key: options[:storage_access_key],
+          principal_id: options[:principal_id],
+          use_managed_identities: options[:use_managed_identities],
+          container: container_name,
+          cloud_regions: azure_credentials[:region],
+        )
       end
 
       def azure_uri(style_name = default_style)
-        "https://#{azure_base_url}/#{container_name}/#{path(style_name).gsub(%r{\A/}, '')}"
-      end
-
-      def azure_base_url
-        Environment.url_for azure_account_name, azure_credentials[:region]
+        azure_interface.generate_uri("#{container_name}/#{path(style_name).gsub(%r{\A/}, '')}")
       end
 
       def azure_container
-        @azure_container ||= azure_interface.get_container_properties container_name
+        @azure_container ||= azure_interface.get_container_properties
       end
 
       def azure_object(style_name = default_style)
-        azure_interface.get_blob_properties container_name, path(style_name).sub(%r{\A/},'')
+        azure_interface.get_blob_properties path(style_name).sub(%r{\A/},'')
       end
 
       def parse_credentials(creds)
@@ -201,13 +183,11 @@ module Paperclip
 
       def exists?(style = default_style)
         if original_filename
-          !azure_object(style).nil?
+          azure_object(style).present?
         else
           false
         end
-      rescue ::Azure::Core::Http::HTTPError => e
-        raise unless e.status_code == 404
-
+      rescue AzureBlob::Http::FileNotFoundError
         false
       end
 
@@ -217,7 +197,6 @@ module Paperclip
 
       def flush_writes #:nodoc:
         @queued_for_write.each do |style, file|
-          retries = 0
           begin
             log("saving #{path(style)}")
 
@@ -226,15 +205,11 @@ module Paperclip
             }
 
             if azure_container
-              save_blob container_name, path(style).sub(%r{\A/},''), file, write_options
+              save_blob path(style).sub(%r{\A/},''), file, write_options
             end
-          rescue ::Azure::Core::Http::HTTPError => e
-            if e.status_code == 404
+          rescue AzureBlob::Http::FileNotFoundError
               create_container
               retry
-            else
-              raise
-            end
           ensure
             file.rewind
           end
@@ -245,22 +220,9 @@ module Paperclip
         @queued_for_write = {}
       end
 
-      def save_blob(container_name, storage_path, file, write_options)
-
-        if file.size < 64.megabytes
-          azure_interface.create_block_blob container_name, storage_path, file.read, write_options
-        else
-          blocks = []; count = 0
-          while data = file.read(4.megabytes)
-            block_id = "block_#{(count += 1).to_s.rjust(5, '0')}"
-
-            azure_interface.put_blob_block container_name, storage_path, block_id, data
-
-            blocks << [block_id]
-          end
-
-          azure_interface.commit_blob_blocks container_name, storage_path, blocks
-        end
+      def save_blob(storage_path, file, write_options)
+        write_options = write_options.merge(block_size: 4.megabytes) if file.size >= 64.megabytes
+        azure_interface.create_block_blob(storage_path, file, write_options)
       end
 
       def flush_deletes #:nodoc:
@@ -268,9 +230,8 @@ module Paperclip
           begin
             log("deleting #{path}")
 
-            azure_interface.delete_blob container_name, path
-          rescue ::Azure::Core::Http::HTTPError => e
-            raise unless e.status_code == 404
+            azure_interface.delete_blob path
+          rescue AzureBlob::Http::FileNotFoundError
           end
         end
         @queued_for_delete = []
@@ -279,15 +240,13 @@ module Paperclip
       def copy_to_local_file(style, local_dest_path)
         log("copying #{path(style)} to local file #{local_dest_path}")
 
-        blob, content = azure_interface.get_blob(container_name, path(style).sub(%r{\A/},''))
+        content = azure_interface.get_blob(path(style).sub(%r{\A/},''))
 
         ::File.open(local_dest_path, 'wb') do |local_file|
           local_file.write(content)
         end
-      rescue ::Azure::Core::Http::HTTPError => e
-        raise unless e.status_code == 404
-
-        warn("#{e} - cannot copy #{path(style)} to local file #{local_dest_path}")
+      rescue AzureBlob::Http::FileNotFoundError
+        warn("Cannot copy #{path(style)} to local file #{local_dest_path}")
         false
       end
 

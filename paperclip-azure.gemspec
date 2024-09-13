@@ -18,7 +18,7 @@ Gem::Specification.new do |gem|
   gem.license       = "MIT"
 
 
-  gem.add_dependency "azure-storage-blob", "~> 2.0"
+  gem.add_dependency "azure-blob", "~> 0.5.2"
   gem.add_dependency "hashie", "~> 5.0"
   gem.add_dependency "addressable", "~> 2.5"
 

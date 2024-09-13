@@ -52,7 +52,6 @@ This is not required, however, and the file may simply look like this:
 
 In which case, those access keys will be used in all environments. You can also put your container name in this file, instead of adding it to the code directly. This is useful when you want the same account but a different container for development versus production.
 
-
 === Private Blob Access
 
 In the even that are using a Blob that has been configured for Private access, you will need to use the Shared Access Signature functionality of Azure.  This functionality has been baked in to the `Attachment#expiring_url` method. Simply specify a time and a style and you will get a proper URL as follows:
@@ -82,6 +81,18 @@ Or, in the instance where the credentials are specified at the model level:
                         container:            ENV['AZURE_CONTAINER_NAME'],
                         region:               :cn
                       }
+
+=== Managed identities (Entra ID)
+
+To authenticate through managed identities instead of using a shared access key, omit passing the access key and pass the principal id of the identity instead. For example:
+
+    Paperclip::Attachment.default_options[:azure_credentials] = {
+        storage_account_name: ENV['AZURE_STORAGE_ACCOUNT'],
+        pincipal_id:          ENV['AZURE_STORAGE_PRINCIPAL_ID],
+        container:            ENV['AZURE_CONTAINER_NAME'],
+        region:               :de
+    }
+
 
 == REQUIREMENTS:
 
